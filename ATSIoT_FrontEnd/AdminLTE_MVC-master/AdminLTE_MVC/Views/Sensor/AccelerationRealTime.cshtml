@@ -1,0 +1,157 @@
+﻿@{
+    ViewBag.Title = "Acceleration - Real Time";
+}
+
+<head>
+    <!-- CanvasJS -->
+    <script src="~/Content/AdminLTE/js/plugins/CanvasJS/canvasjs.min.js"></script>
+
+    @Scripts.Render(BundleConfig.BundlesJquery)
+    <!--Real Time-->
+
+    <script type="text/javascript">
+	window.onload = function () {
+
+		var dps = []; // dataPoints
+
+		var chart = new CanvasJS.Chart("realtimeContainer",{
+			title :{
+				text: "Live Data "
+			},
+			toolTip: {
+			    contentFormatter: function (e) {
+			        var content = "";
+			        for (var i = 0; i < e.entries.length; i++) {
+			            content = CanvasJS.formatDate(e.entries[i].dataPoint.x, "HH:mm:ss DD-MMM-YY") + " - " + e.entries[i].dataPoint.y;
+			        }
+			        return content;
+			    }
+			},
+
+			data: [{
+				type: "line",
+				dataPoints: dps
+			}]
+		});
+
+		var updateInterval = 1000;
+		var dataLength = 30; // number of dataPoints visible at any point
+
+		var updateChart = function () {
+            @{
+                AdminLTE_MVC.Models.AccelerationDataPoint temp = ((AdminLTE_MVC.Controllers.SensorController)this.ViewContext.Controller).GetAccelerationData("ac");
+            }
+            dps.push({
+                x: new Date("@temp.X"),
+                y: parseFloat("@temp.Y"),
+            });
+
+		    console.log(dps);
+		    if (dps.length > dataLength) {
+		        dps.shift();
+		    }
+		    chart.render();
+		};
+
+		// generates first set of dataPoints
+		updateChart(dataLength);
+
+		// update chart after specified time.
+		setInterval(function(){updateChart()}, updateInterval);
+
+	}
+    </script>
+
+</head>
+
+<body>
+
+</body>
+<section class="content">
+
+    <!-- Small boxes (Stat box) -->
+    <!-- Content Wrapper. Contains page content -->
+    <div class="content-wrapper">
+        <!-- Content Header (Page header) -->
+        <section class="content-header">
+            <h1>
+                Dashboard
+                <small>rasberry-pi-II</small>
+            </h1>
+        </section>
+
+        <!-- Main content -->
+        <section class="content">
+
+            <div class="col-md-1 col-sm-6 col-xs-12">
+
+
+                <div>
+                    <input type="button" class="btn btn-primary" value="real time" onclick="location.href='@Url.Action("AccelerationRealTime", "Sensor", new { datatype = "ac" })'" />
+                </div><!-- /.info-box-content -->
+
+            </div><!-- /.col -->
+
+            <div class="col-md-2 col-sm-6 col-xs-12">
+                <input type="button" class="btn btn-primary" value="history" onclick="location.href='@Url.Action("AccelerationHistory", "Sensor", new { datatype = "ac" })'" />
+            </div><!-- /.col -->
+
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="box">
+                        <div class="box-header with-border">
+                            <h3 class="box-title">Real Time</h3>
+                            <div class="box-tools pull-right">
+                                <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                                <!-- Button below may be used if some more functionalities want to be developed with the graph-->
+                                <!--
+                                <div class="btn-group">
+                                    <button class="btn btn-box-tool dropdown-toggle" data-toggle="dropdown"><i class="fa fa-wrench"></i></button>
+                                    <ul class="dropdown-menu" role="menu">
+                                        <li><a href="#">Action</a></li>
+                                        <li><a href="#">Another action</a></li>
+                                        <li><a href="#">Something else here</a></li>
+                                        <li class="divider"></li>
+                                        <li><a href="#">Separated link</a></li>
+                                    </ul>
+                                </div>
+                                    -->
+                                <button class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
+                            </div>
+                        </div><!-- /.box-header -->
+                        <div class="box-body">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <p class="text-center">
+                                        <strong>Real Time</strong>
+                                    </p>
+                                    <div class="realtime">
+                                        <!-- Chart Canvas -->
+                                        <div id="realtimeContainer" style="height: 300px; width: 100%;">
+                                        </div><!-- /.chart-responsive -->
+                                    </div><!-- /.col -->
+
+                                </div><!-- /.col -->
+                            </div><!-- /.row -->
+                        </div><!-- ./box-body -->
+                    </div><!-- /.row -->
+                </div><!-- /.box-footer -->
+            </div>
+
+
+
+
+
+            <div class="row">
+            </div><!-- /.row -->
+            <!-- top row -->
+            <div class="row">
+                <div class="col-xs-12 connectedSortable">
+                </div><!-- /.col -->
+            </div>
+            <!-- /.row -->
+            <!-- Main row -->
+            <div class="row">
+            </div><!-- /.row (main row) -->
+        </section>
+</section>
